@@ -17,18 +17,9 @@ namespace KP_OP_21
         private void button1_Click(object sender, EventArgs e)
         {
             //KruskalAlgorithm();
-            PrimAlgorithm();
+            //PrimAlgorithm();
+            BoruvkaAlgorithm();
         }
-
-
-        private Vertex ChooseRandomVertex(List<Vertex> vertices)
-        {
-            Random random = new Random();
-            int index = random.Next(vertices.Count);
-            return vertices[index];
-        }
-
-
 
 
         private void PrimAlgorithm()
@@ -102,32 +93,85 @@ namespace KP_OP_21
         }
 
 
+        private void BoruvkaAlgorithm()
+        {
+            // Ініціалізуємо матрицю суміжності
+            InitializeAdjacencyMatrix();
 
-        //private void InitializeGraph()
-        //{
-        //    int vertexCount = 3;
-        //    adjacencyMatrix = new double[vertexCount, vertexCount];
-        //    selectedVertices = new List<int>();
-        //    edges = new List<Edge>();
-        //    minimumSpanningTreeEdgeIDs = new List<int>();
+            // Кількість вершин
+            int vertexCount = vertices.Count;
 
-        //    // Додаємо ребра та їх ваги
-        //    edges.Add(new Edge(0, 1, 1, 0)); // Вага 1 між вершинами 0 та 1
-        //    edges.Add(new Edge(0, 2, 2, 1)); // Вага 2 між вершинами 0 та 2
-        //    edges.Add(new Edge(1, 2, 12, 2)); // Вага 12 між вершинами 1 та 2
+            // Створюємо список, що містить індекси ребер, які утворюють мінімальне остовне дерево
+            minimumSpanningTreeEdgeIDs.Clear();
 
-        //    // Заповнюємо матрицю суміжності відповідно до ребер
-        //    foreach (var edge in edges)
-        //    {
-        //        int startIndex = (int)edge.StartVertex;
-        //        int endIndex = (int)edge.EndVertex;
-        //        adjacencyMatrix[startIndex, endIndex] = edge.Weight;
-        //        adjacencyMatrix[endIndex, startIndex] = edge.Weight; // Матриця симетрична
-        //    }
+            // Поки не утвориться мінімальне остовне дерево
+            while (minimumSpanningTreeEdgeIDs.Count < vertexCount - 1)
+            {
+                // Створюємо масив, що містить індекси найдешевших ребер для кожного компоненту
+                int[] cheapestEdges = new int[vertexCount];
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    cheapestEdges[i] = -1; // Ініціалізуємо значенням -1, яке вказуватиме, що ребро ще не знайдено
+                }
 
-        //    // Додаємо початкову вершину для алгоритму Прима (починаємо з першої вершини)
-        //    selectedVertices.Add(0);
-        //}
+                // Перебираємо всі ребра графу
+                foreach (var edge in edges)
+                {
+                    int rootStart = FindRoot(edge.StartVertex);
+                    int rootEnd = FindRoot(edge.EndVertex);
+
+                    // Якщо ребро сполучає два різні компоненти
+                    if (rootStart != rootEnd)
+                    {
+                        // Якщо це найдешевше ребро для одного з компонентів або жодний з компонентів не має ще ребра
+                        if (cheapestEdges[rootStart] == -1 || edge.Weight < edges[cheapestEdges[rootStart]].Weight)
+                        {
+                            cheapestEdges[rootStart] = edges.IndexOf(edge);
+                        }
+                        if (cheapestEdges[rootEnd] == -1 || edge.Weight < edges[cheapestEdges[rootEnd]].Weight)
+                        {
+                            cheapestEdges[rootEnd] = edges.IndexOf(edge);
+                        }
+                    }
+                }
+
+                // Додаємо найдешевші ребра до мінімального остовного дерева
+                foreach (int edgeIndex in cheapestEdges)
+                {
+                    if (edgeIndex != -1 && !minimumSpanningTreeEdgeIDs.Contains(edgeIndex))
+                    {
+                        minimumSpanningTreeEdgeIDs.Add(edgeIndex);
+                        edges[edgeIndex].IsInMinimumSpanningTree = true;
+                    }
+                }
+            }
+
+            // Оновлюємо відображення форми
+            Refresh();
+        }
+
+        // Метод для знаходження кореня компоненту, до якого входить дана вершина
+        private int FindRoot(Vertex vertex)
+        {
+            int index = vertices.IndexOf(vertex);
+            while (vertex != vertices[index])
+            {
+                vertex = vertices[index];
+                index = vertices.IndexOf(vertex);
+            }
+            return index;
+        }
+
+
+
+
+        // Функція для знаходження кількості різних компонент зв'язності
+        private int GetDistinctComponentsCount(int[] component)
+        {
+            HashSet<int> distinctComponents = new HashSet<int>(component);
+            return distinctComponents.Count;
+        }
+
 
 
         private void KruskalAlgorithm()
@@ -186,21 +230,6 @@ namespace KP_OP_21
             return new Edge(startPoint, endPoint);
         }
 
-        ////private void InitializeAdjacencyMatrix()
-        ////{
-        ////    int size = vertices.Count;
-        ////    adjacencyMatrix = new double[size, size];
-
-        ////    // Заповнюємо матрицю суміжності вагами ребер
-        ////    foreach (var edge in edges)
-        ////    {
-        ////        int startIndex = vertices.IndexOf(edge.StartVertex.point);
-        ////        int endIndex = vertices.IndexOf(edge.EndVertex.point);
-        ////        adjacencyMatrix[startIndex, endIndex] = edge.Weight;
-        ////        adjacencyMatrix[endIndex, startIndex] = edge.Weight; // Симетричність матриці
-        ////    }
-        ////}
-
         private void InitializeAdjacencyMatrix()
         {
             int size = vertices.Count;
@@ -255,32 +284,6 @@ namespace KP_OP_21
             }
         }
 
-
-        //private Edge CalculateEdgeFromIndex(int edgeIndex)
-        //{
-        //    // Розраховуємо координати вершин, які утворюють ребро за їхніми індексами
-        //    int startIndex = edgeIndex;
-        //    Point startPoint = new Point(vertices[startIndex].X, vertices[startIndex].Y);
-
-        //    // Знаходимо вершину, з якою з'єднано ребро
-        //    int connectedIndex = -1;
-        //    for (int i = 0; i < vertices.Count; i++)
-        //    {
-        //        if (adjacencyMatrix[startIndex, i] != 0)
-        //        {
-        //            connectedIndex = i;
-        //            break;
-        //        }
-        //    }
-
-        //    Point endPoint = new Point(vertices[connectedIndex].X, vertices[connectedIndex].Y);
-
-        //    return new Edge(startPoint, endPoint);
-        //}
-
-        /// <summary>
-        /// ///////////////////////////////////////////////////////////
-        /// </summary>
         enum Mode
         {
             addVerticle = 0,
@@ -329,101 +332,6 @@ namespace KP_OP_21
         Button firstBut;
         Button secondBut;
 
-        ////private void VerticleButtons(object sender, EventArgs e)
-        ////{
-        ////    Button clickedButton = sender as Button;
-        ////    if (clickedButton != null)
-        ////    {
-        ////        if (isFirst)
-        ////        {
-        ////            isFirst = false;
-        ////            firstBut = clickedButton;
-        ////        }
-        ////        else
-        ////        {
-        ////            isFirst = true;
-        ////            secondBut = clickedButton;
-        ////        }
-
-        ////        if (firstBut != null && secondBut != null)
-        ////        {
-        ////            int firstIndex = buttons.IndexOf(firstBut);
-        ////            int secondIndex = buttons.IndexOf(secondBut);
-
-        ////            if (firstIndex != -1 && secondIndex != -1)
-        ////            {
-        ////                Vertex start = new Vertex(firstBut.Location.X + firstBut.Width / 2, firstBut.Location.Y + firstBut.Height / 2);
-        ////                Vertex end = new Vertex(secondBut.Location.X + secondBut.Width / 2, secondBut.Location.Y + secondBut.Height / 2);
-
-        ////                // Вага ребра
-        ////                int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
-
-        ////                // Додаємо з'єднання між вершинами у матрицю суміжності
-        ////                adjacencyMatrix[firstIndex, secondIndex] = weight;
-        ////                adjacencyMatrix[secondIndex, firstIndex] = weight; // Зберігаємо симетричність
-
-        ////                Edge newEdge = new Edge(start, end);
-        ////                newEdge.Weight = weight; // Встановлюємо вагу ребра
-        ////                edges.Add(newEdge);
-
-        ////                this.Invalidate();
-        ////                // Показуємо діалог для встановлення ваги ребра (якщо потрібно)
-        ////                 ShowEdgeWeightDialog(newEdge);
-
-        ////                firstBut = null;
-        ////                secondBut = null;
-        ////            }
-        ////        }
-        ////    }
-        ////}
-
-        //private void VerticleButtons(object sender, EventArgs e)
-        //{
-        //    Button clickedButton = sender as Button;
-        //    if (clickedButton != null)
-        //    {
-        //        if (isFirst)
-        //        {
-        //            isFirst = false;
-        //            firstBut = clickedButton;
-        //        }
-        //        else
-        //        {
-        //            isFirst = true;
-        //            secondBut = clickedButton;
-        //        }
-
-        //        if (firstBut != null && secondBut != null)
-        //        {
-        //            int firstIndex = buttons.IndexOf(firstBut);
-        //            int secondIndex = buttons.IndexOf(secondBut);
-
-        //            if (firstIndex != -1 && secondIndex != -1)
-        //            {
-        //                Vertex start = vertices[firstIndex];
-        //                Vertex end = vertices[secondIndex];
-
-        //                // Вага ребра
-        //                int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
-
-        //                // Додаємо з'єднання між вершинами у матрицю суміжності
-        //                adjacencyMatrix[firstIndex, secondIndex] = weight;
-        //                adjacencyMatrix[secondIndex, firstIndex] = weight; // Зберігаємо симетричність
-
-        //                Edge newEdge = new Edge(start, end);
-        //                newEdge.Weight = weight; // Встановлюємо вагу ребра
-        //                edges.Add(newEdge);
-
-        //                this.Invalidate();
-        //                // Показуємо діалог для встановлення ваги ребра (якщо потрібно)
-        //                ShowEdgeWeightDialog(newEdge);
-
-        //                firstBut = null;
-        //                secondBut = null;
-        //            }
-        //        }
-        //    }
-        //}
 
         private void VerticleButtons(object sender, EventArgs e)
         {
@@ -691,7 +599,6 @@ namespace KP_OP_21
             return false;
         }
 
-        // Інші методи та функції можна додати за потреби
     }
 
 
