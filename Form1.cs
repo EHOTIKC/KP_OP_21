@@ -55,6 +55,12 @@ namespace KP_OP_21
         List<int> minimumSpanningTreeEdgeIDs = new List<int>(); // Індекси ребер утвореного остовного дерева
         List<Button> interfaceButtons = new List<Button>(); // Список кнопок інтерфейсу
 
+
+
+        bool isFirst = true;
+        Button firstBut;
+        Button secondBut;
+
         private void btnSearch_Click(object sender, EventArgs e)
         {
             // Перевірте, чи обраний метод пошуку
@@ -87,6 +93,22 @@ namespace KP_OP_21
 
         private void button1_Click(object sender, EventArgs e)
         {
+
+
+            // Перевірка, чи є хочаб дві вершини
+            if (vertices.Count < 2)
+            {
+                MessageBox.Show("Додайте ще вершини для запуску алгоритму пошуку", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Перевірте, чи є хочаб одне ребро
+            if (edges.Count < 1)
+            {
+                MessageBox.Show("Додайте ще ребра для запуску алгоритму пошуку", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             //GenerateRandomGraph(3);
             bool allConnected = true; // Прапорець, що вказує, чи всі вершини приєднані до графа
 
@@ -438,9 +460,6 @@ namespace KP_OP_21
 
 
 
-        bool isFirst = true;
-        Button firstBut;
-        Button secondBut;
 
         private void VerticleButtons(object sender, EventArgs e)
         {
@@ -466,37 +485,65 @@ namespace KP_OP_21
                         int firstIndex = buttons.IndexOf(firstBut);
                         int secondIndex = buttons.IndexOf(secondBut);
 
-                        if (firstIndex != -1 && secondIndex != -1)
+                        // Перевірка на рівність ідентифікаторів вершин
+                        if (firstIndex != -1 && secondIndex != -1 && firstIndex != secondIndex)
                         {
-                            Vertex start = vertices[firstIndex];
-                            Vertex end = vertices[secondIndex];
-                            vertices[firstIndex].IsConnectedToGraph = true;
-                            vertices[secondIndex].IsConnectedToGraph = true;
+                            // Перевірка на наявність ребра між вершинами
+                            bool edgeExists = false;
+                            Edge existingEdge = null;
+                            foreach (var edge in edges)
+                            {
+                                if ((edge.StartVertex.Id == firstIndex && edge.EndVertex.Id == secondIndex) || (edge.StartVertex.Id == secondIndex && edge.EndVertex.Id == firstIndex))
+                                {
+                                    edgeExists = true;
+                                    existingEdge = edge;
+                                    break;
+                                }
+                            }
 
+                            if (edgeExists)
+                            {
+                                // Заміна ваги існуючого ребра
+                                int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
+                                existingEdge.Weight = weight;
+                                this.Invalidate();
+                                // Запит нової ваги ребра
+                                ShowEdgeWeightDialog(existingEdge);
+                            }
+                            else
+                            {
+                                Vertex start = vertices[firstIndex];
+                                Vertex end = vertices[secondIndex];
+                                vertices[firstIndex].IsConnectedToGraph = true;
+                                vertices[secondIndex].IsConnectedToGraph = true;
 
-                            // Вага ребра
-                            int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
+                                // Вага ребра
+                                int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
 
-                            // Додаємо з'єднання між вершинами у матрицю суміжності
-                            adjacencyMatrix[firstIndex, secondIndex] = weight;
-                            adjacencyMatrix[secondIndex, firstIndex] = weight; // Зберігаємо симетричність
+                                // Додаємо з'єднання між вершинами у матрицю суміжності
+                                adjacencyMatrix[firstIndex, secondIndex] = weight;
+                                adjacencyMatrix[secondIndex, firstIndex] = weight; // Зберігаємо симетричність
 
-                            Edge newEdge = new Edge(start, end);
-                            newEdge.Weight = weight; // Встановлюємо вагу ребра
-                            edges.Add(newEdge);
+                                Edge newEdge = new Edge(start, end);
+                                newEdge.Weight = weight; // Встановлюємо вагу ребра
+                                edges.Add(newEdge);
 
-                            // Додаємо ребро до вершин
-                            start.AddEdge(newEdge);
-                            end.AddEdge(newEdge);
+                                // Додаємо ребро до вершин
+                                start.AddEdge(newEdge);
+                                end.AddEdge(newEdge);
 
-
-                            this.Invalidate();
-                            // Показуємо діалог для встановлення ваги ребра (якщо потрібно)
-                            ShowEdgeWeightDialog(newEdge);
-
+                                this.Invalidate();
+                                // Показуємо діалог для встановлення ваги ребра (якщо потрібно)
+                                ShowEdgeWeightDialog(newEdge);
+                            }
 
                             firstBut = null;
                             secondBut = null;
+                        }
+                        else
+                        {
+                            isFirst = !isFirst; // Повертаємо isFirst до попереднього стану
+                            MessageBox.Show("Оберіть дві різні вершини", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
@@ -504,9 +551,9 @@ namespace KP_OP_21
                 {
                     PointRemove(sender, e);
                 }
-
             }
         }
+
 
 
 
@@ -750,6 +797,12 @@ namespace KP_OP_21
 
         private void AddVetixMode(object sender, EventArgs e)
         {
+            if (!isFirst)
+            {
+                // Перевірка, чи перша вершина вже обрана
+                MessageBox.Show("Спершу оберіть другу вершину", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; // Повертаємося, не робимо нічого більше
+            }
             SetButtonsColor();
 
             if (currentMode == Mode.AddVertex)
@@ -765,9 +818,16 @@ namespace KP_OP_21
 
         }
 
+
         private void AddEdgeMode(object sender, EventArgs e)
         {
 
+            if (vertices.Count < 2)
+            {
+                // Перевірка, чи існує достатня кількість вершин для додавання ребер
+                MessageBox.Show("Додайте ще вершини для створення ребер", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; // Повертаємося, не робимо нічого більше
+            }
 
             if (currentMode == Mode.AddEdges)
             {
@@ -777,20 +837,22 @@ namespace KP_OP_21
                     MessageBox.Show("Спершу оберіть другу вершину", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Повертаємося, не робимо нічого більше
                 }
+
+
                 SetButtonsColor();
 
                 currentMode = Mode.defaultMode;
             }
             else
             {
-                            SetButtonsColor();
+                SetButtonsColor();
 
                 currentMode = Mode.AddEdges;
                 Button clickedButton = (Button)sender;
                 clickedButton.BackColor = Color.Gray;
             }
-
         }
+
 
         private void GenerateRandomGraph(int size)
         {
