@@ -20,10 +20,5 @@ namespace KP_OP_21
             Application.Run(new Form1());
         }
 
-
-        //public partial class Form2 : Form1
-        //{
-
-        //}
     }
 }
