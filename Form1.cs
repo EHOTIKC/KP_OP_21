@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using System.Xml;
+using Newtonsoft.Json;
 
 namespace KP_OP_21
 {
@@ -23,6 +26,8 @@ namespace KP_OP_21
             interfaceButtons.Add(button4);
             interfaceButtons.Add(button5);
             interfaceButtons.Add(button6);
+            interfaceButtons.Add(button7);
+            interfaceButtons.Add(button8);
 
             // Додайте обробники подій для кнопок інтерфейсу
             button1.Click += new System.EventHandler(this.button1_Click);
@@ -31,6 +36,8 @@ namespace KP_OP_21
             button4.Click += new System.EventHandler(this.EnterSizeOfGeneratedGraph);
             button5.Click += new System.EventHandler(this.AddVetixMode);
             button6.Click += new System.EventHandler(this.AddEdgeMode);
+            button7.Click += new System.EventHandler(this.SaveGraphButton_Click);
+            button8.Click += new System.EventHandler(this.LoadGraphButton_Click);
         }
 
         // Перерахування для представлення методів пошуку
@@ -61,6 +68,181 @@ namespace KP_OP_21
         Button firstBut;
         Button secondBut;
 
+        //public void SaveToFile(string fileName)
+        //{
+        //    string json = JsonConvert.SerializeObject(vertices); // vertices - ваш список вершин
+
+        //    File.WriteAllText(fileName, json);
+        //}
+
+        // Зчитування об'єктів з файлу
+        //public void LoadFromVertiFile(string fileName)
+        //{
+        //    if (File.Exists(fileName))
+        //    {
+        //        string json = File.ReadAllText(fileName);
+
+        //        vertices = JsonConvert.DeserializeObject<List<Vertex>>(json); // vertices - ваш список вершин
+        //    }
+        //}
+        private void LoadGraphButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "JSON files (*.json)|*.json";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //currentMode = Mode.defaultMode;
+                //SetButtonsColor();
+                LoadGraphFromFile(openFileDialog.FileName);
+            }
+        }
+
+        private void LoadGraphFromFile(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                GraphData graphData = JsonConvert.DeserializeObject<GraphData>(json);
+
+                // Очищення поточного графу перед завантаженням нового
+                ClearGraph(null, null);
+
+                // Додавання вершин з файлу
+                vertices.AddRange(graphData.Vertices);
+
+                // Додавання ребер з файлу
+
+                edges.AddRange(graphData.Edges);
+
+                // Оновлення інтерфейсу (додавання кнопок для вершин)
+                foreach (Vertex vertex in vertices)
+                {
+                    Button newButton = new Button();
+                    newButton.Location = new Point((int)vertex.X - 20, (int)vertex.Y - 20);
+                    newButton.Size = new Size(40, 40);
+                    newButton.BackColor = Color.Black;
+                    newButton.ForeColor = Color.White;
+                    newButton.Text = vertices.IndexOf(vertex).ToString();
+                    newButton.Click += new EventHandler(VerticleButtons);
+                    buttons.Add(newButton);
+                    Controls.Add(newButton);
+                }
+
+                Refresh();
+
+                MessageBox.Show("Граф успішно завантажено з файлу!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка завантаження з файлу: " + ex.Message);
+            }
+        }
+
+
+
+        private void SaveGraphButton_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "JSON files (*.json)|*.json";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                SaveGraphToFile(saveFileDialog.FileName);
+            }
+        }
+        private void SaveGraphToFile(string filePath)
+        {
+            try
+            {
+                GraphData graphData = new GraphData
+                {
+                    Vertices = vertices,
+                    Edges = edges
+                };
+
+                string json = JsonConvert.SerializeObject(graphData);
+                File.WriteAllText(filePath, json);
+
+                MessageBox.Show("Граф успішно збережено у файл!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка збереження у файл: " + ex.Message);
+            }
+        }
+
+
+
+
+        public void LoadFromFile(string filePath)
+        {
+            // Очистіть списки, щоб уникнути дублювання даних при кожному зчитуванні
+            vertices.Clear();
+            edges.Clear();
+
+            // Прочитайте усі рядки з файлу
+            string[] lines = File.ReadAllLines(filePath);
+
+            // Перевірте кожен рядок та розбийте його на частини для створення вершин або ребер
+            foreach (string line in lines)
+            {
+                if (line.StartsWith("Vertices:"))
+                {
+                    // Читаємо вершини
+                    ReadVertices(lines, Array.IndexOf(lines, line) + 1);
+                }
+                else if (line.StartsWith("Edges:"))
+                {
+                    // Читаємо ребра
+                    ReadEdges(lines, Array.IndexOf(lines, line) + 1);
+                }
+            }
+        }
+
+        private void ReadVertices(string[] lines, int startIndex)
+        {
+            for (int i = startIndex; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                if (line.StartsWith("Edges:"))
+                {
+                    break; // Досягнули кінця списку вершин
+                }
+
+                string[] parts = line.Split(' ');
+                if (parts.Length >= 3)
+                {
+                    double x = double.Parse(parts[1]);
+                    double y = double.Parse(parts[2]);
+                    vertices.Add(new Vertex(x, y)); // Створюємо вершину та додаємо її до списку
+                }
+            }
+        }
+
+        private void ReadEdges(string[] lines, int startIndex)
+        {
+            for (int i = startIndex; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                string[] parts = line.Split(' ');
+                if (parts.Length >= 3)
+                {
+                    int startVertexId = int.Parse(parts[0]);
+                    int endVertexId = int.Parse(parts[1]);
+                    double weight = double.Parse(parts[2]);
+
+                    // Знайдіть вершини за їхніми ідентифікаторами
+                    Vertex startVertex = vertices.Find(v => v.Id == startVertexId);
+                    Vertex endVertex = vertices.Find(v => v.Id == endVertexId);
+
+                    // Створіть ребро та додайте його до списку ребер у кожну вершину
+                    Edge edge = new Edge(startVertex, endVertex);
+                    edge.Weight = weight;
+                    edges.Add(edge);
+                    startVertex.AddEdge(edge);
+                    endVertex.AddEdge(edge);
+                }
+            }
+        }
         private void btnSearch_Click(object sender, EventArgs e)
         {
             // Перевірте, чи обраний метод пошуку
@@ -950,6 +1132,17 @@ namespace KP_OP_21
         }
     }
 
+    public class GraphData
+    {
+        public List<Vertex> Vertices { get; set; }
+        public List<Edge> Edges { get; set; }
+
+        public GraphData()
+        {
+            Vertices = new List<Vertex>();
+            Edges = new List<Edge>();
+        }
+    }
 
 
     public class EdgeButton : Button

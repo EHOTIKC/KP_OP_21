@@ -47,6 +47,8 @@ namespace KP_OP_21
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -84,6 +86,7 @@ namespace KP_OP_21
             // 
             // comboBox1
             // 
+            this.comboBox1.Font = new System.Drawing.Font("Arial", 10F);
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
             "Prim",
@@ -91,10 +94,9 @@ namespace KP_OP_21
             "Kruskal"});
             this.comboBox1.Location = new System.Drawing.Point(2, 92);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(256, 24);
+            this.comboBox1.Size = new System.Drawing.Size(256, 27);
             this.comboBox1.TabIndex = 3;
             this.comboBox1.Text = "оберіть метод пошуку";
-            this.comboBox1.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             // 
             // button4
             // 
@@ -129,12 +131,36 @@ namespace KP_OP_21
             this.button6.Text = "додати ребро";
             this.button6.UseVisualStyleBackColor = false;
             // 
+            // button7
+            // 
+            this.button7.BackColor = System.Drawing.Color.White;
+            this.button7.Font = new System.Drawing.Font("Arial", 12F);
+            this.button7.Location = new System.Drawing.Point(1019, 92);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(231, 86);
+            this.button7.TabIndex = 7;
+            this.button7.Text = "зберегти в файл";
+            this.button7.UseVisualStyleBackColor = false;
+            // 
+            // button8
+            // 
+            this.button8.BackColor = System.Drawing.Color.White;
+            this.button8.Font = new System.Drawing.Font("Arial", 12F);
+            this.button8.Location = new System.Drawing.Point(1019, 184);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(231, 86);
+            this.button8.TabIndex = 8;
+            this.button8.Text = "зчитати файл";
+            this.button8.UseVisualStyleBackColor = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonShadow;
             this.ClientSize = new System.Drawing.Size(1924, 1055);
+            this.Controls.Add(this.button8);
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -144,7 +170,6 @@ namespace KP_OP_21
             this.Controls.Add(this.button1);
             this.DoubleBuffered = true;
             this.Name = "Form1";
-            this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
@@ -162,6 +187,8 @@ namespace KP_OP_21
         private Button button4;
         private Button button5;
         private Button button6;
+        private Button button7;
+        private Button button8;
     }
 }
 
