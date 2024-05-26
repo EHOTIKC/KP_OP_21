@@ -101,7 +101,7 @@ namespace KP_OP_21
                 return;
             }
 
-            bool allConnected = true; // Прапорець, що вказує, чи всі вершини приєднані до графа
+            bool allConnected = true;
 
             foreach (var vertex in vertices)
             {
