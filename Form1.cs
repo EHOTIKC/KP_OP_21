@@ -38,7 +38,6 @@ namespace KP_OP_21
             defaultMode = -1,
             AddVertex = 0,
             AddEdges = 1,
-            //RemoveVertex = 2,
         }
         Mode currentMode = Mode.defaultMode;
         List<Button> buttons = new List<Button>(); // Список кнопок на формі
@@ -73,7 +72,7 @@ namespace KP_OP_21
                 {
                     Vertices = vertices,
                     Edges = edges,
-                    AdjacencyMatrix = adjacencyMatrix // Додайте матрицю суміжності до об'єкта GraphData
+                    AdjacencyMatrix = adjacencyMatrix
                 };
 
                 string json = JsonConvert.SerializeObject(graphData);
@@ -90,26 +89,20 @@ namespace KP_OP_21
 
         private void StartSearchClick(object sender, EventArgs e)
         {
-
-
-            // Перевірка, чи є хочаб дві вершини
             if (vertices.Count < 2)
             {
                 MessageBox.Show("Додайте ще вершини для запуску алгоритму пошуку", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            // Перевірте, чи є хочаб одне ребро
             if (edges.Count < 1)
             {
                 MessageBox.Show("Додайте ще ребра для запуску алгоритму пошуку", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            //GenerateRandomGraph(3);
             bool allConnected = true; // Прапорець, що вказує, чи всі вершини приєднані до графа
 
-            // Перевірка, чи всі вершини приєднані до графа
             foreach (var vertex in vertices)
             {
                 if (!vertex.IsConnectedToGraph)
@@ -123,7 +116,6 @@ namespace KP_OP_21
             {
                 if (comboBox1.SelectedIndex != -1)
                 {
-                    // Отримайте обраний метод пошуку з ComboBox
                     string selectedMethod = comboBox1.SelectedItem.ToString();
                     switch (selectedMethod)
                     {
@@ -148,7 +140,6 @@ namespace KP_OP_21
             }
             else
             {
-                // Виведення повідомлення про помилку, якщо не всі вершини приєднані до графа
                 MessageBox.Show("Не всі вершини приєднані до графа! Перевірте з'єднання між вершинами.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
@@ -159,17 +150,15 @@ namespace KP_OP_21
 
         private void PrimAlgorithm()
         {
-            // Ініціалізуємо матрицю суміжності
             InitializeAdjacencyMatrix();
 
             // Індекси вибраних вершин
             HashSet<int> selectedVertices = new HashSet<int>();
-            selectedVertices.Add(0); // Починаємо з першої вершини
+            selectedVertices.Add(0);
 
             // Кількість вершин
             int vertexCount = vertices.Count;
 
-            // Масив, що містить індекси ребер, які утворюють мінімальне остовне дерево
             minimumSpanningTreeEdgeIDs.Clear();
             int iterations = 0;
             int edgeCount = 0; // Лічильник для перевірки на нескінченний цикл
@@ -213,18 +202,15 @@ namespace KP_OP_21
                 }
                 else
                 {
-                    // Якщо немає доступних ребер, виходимо з циклу
                     break;
                 }
             }
 
-            // Перевіряємо, чи знайдено достатньо ребер для мінімального остовного дерева
             if (edgeCount != vertexCount - 1)
             {
                 MessageBox.Show("Не можливо обрахувати даним методом", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            // Позначаємо всі вершини, які з'єднані з мінімальним остовним деревом, як вибрані
             foreach (var vertex in vertices)
             {
                 if (selectedVertices.Contains(vertex.Id))
@@ -233,7 +219,6 @@ namespace KP_OP_21
                 }
             }
             ResetEdgeStatus();
-            // Оновлюємо відображення форми
             Refresh();
             MessageBox.Show($"Алгоритм Прима завершився за {iterations} ітерацій.");
         }
@@ -241,39 +226,31 @@ namespace KP_OP_21
 
         private void BoruvkaAlgorithm()
         {
-            // Ініціалізуємо матрицю суміжності
             InitializeAdjacencyMatrix();
 
-            // Кількість вершин
             int vertexCount = vertices.Count;
 
-            // Створюємо список, що містить індекси ребер, які утворюють мінімальне остовне дерево
             minimumSpanningTreeEdgeIDs.Clear();
 
             int iterations = 0;
-            // Поки не утвориться мінімальне остовне дерево
             while (minimumSpanningTreeEdgeIDs.Count < vertexCount - 1)
             {
                 iterations++;
-                // Створюємо масив, що містить індекси найдешевших ребер для кожного компоненту
                 int[] cheapestEdges = new int[vertexCount];
                 for (int i = 0; i < vertexCount; i++)
                 {
-                    cheapestEdges[i] = -1; // Ініціалізуємо значенням -1, яке вказуватиме, що ребро ще не знайдено
+                    cheapestEdges[i] = -1;
                 }
 
-                bool addedEdge = false; // Перевірка чи було додане хоч одне ребро
+                bool addedEdge = false;
 
-                // Перебираємо всі ребра графу
                 foreach (var edge in edges)
                 {
                     int rootStart = FindRoot(edge.StartVertex);
                     int rootEnd = FindRoot(edge.EndVertex);
 
-                    // Якщо ребро сполучає два різні компоненти
                     if (rootStart != rootEnd)
                     {
-                        // Якщо це найдешевше ребро для одного з компонентів або жодний з компонентів не має ще ребра
                         if (cheapestEdges[rootStart] == -1 || edge.Weight < edges[cheapestEdges[rootStart]].Weight)
                         {
                             cheapestEdges[rootStart] = edges.IndexOf(edge);
@@ -285,18 +262,16 @@ namespace KP_OP_21
                     }
                 }
 
-                // Додаємо найдешевші ребра до мінімального остовного дерева
                 foreach (int edgeIndex in cheapestEdges)
                 {
                     if (edgeIndex != -1 && !minimumSpanningTreeEdgeIDs.Contains(edgeIndex))
                     {
                         minimumSpanningTreeEdgeIDs.Add(edgeIndex);
                         edges[edgeIndex].IsInMinimumSpanningTree = true;
-                        addedEdge = true; // Вказуємо, що було додане ребро
+                        addedEdge = true;
                     }
                 }
 
-                // Якщо жодне ребро не було додане, виводимо помилку
                 if (!addedEdge)
                 {
                     MessageBox.Show("Неможливо обрахувати мінімальне остовне дерево даним методом", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -306,13 +281,11 @@ namespace KP_OP_21
             }
             ResetEdgeStatus();
 
-            // Оновлюємо відображення форми
             Refresh();
             MessageBox.Show($"Алгоритм Бору́вка завершився за {iterations} ітерацій.");
         }
 
 
-        // Метод для знаходження кореня компоненту, до якого входить дана вершина
         private int FindRoot(Vertex vertex)
         {
             int index = vertices.IndexOf(vertex);
@@ -327,18 +300,15 @@ namespace KP_OP_21
 
         private void KruskalAlgorithm()
         {
-            // Ініціалізуємо матрицю суміжності
             InitializeAdjacencyMatrix();
             ResetEdgeStatus();
 
-            // Кількість вершин
             int vertexCount = vertices.Count;
             DisjointSet disjointSet = new DisjointSet(vertexCount);
 
             int iterations = 0;
-            int edgeCount = 0;// Лічильник доданих ребер
+            int edgeCount = 0;
 
-            // Обираємо ребра для мінімального остовного дерева
             foreach (var edge in edges.OrderBy(e => e.Weight))
             {
                 iterations++;
@@ -346,33 +316,28 @@ namespace KP_OP_21
                 int rootEnd = disjointSet.Find(vertices.IndexOf(edge.EndVertex));
                 if (rootStart != rootEnd)
                 {
-                    // Якщо вершини не знаходяться в одній компоненті, додаємо ребро
                     edge.IsInMinimumSpanningTree = true;
                     disjointSet.Union(vertices.IndexOf(edge.StartVertex), vertices.IndexOf(edge.EndVertex));
                     edgeCount++;
                 }
 
-                // Якщо ми знайшли достатньо ребер для MST, виходимо з циклу
                 if (edgeCount == vertexCount - 1)
                 {
                     break;
                 }
             }
 
-            // Перевіряємо, чи знайдено достатньо ребер для мінімального остовного дерева
             if (edgeCount != vertexCount - 1)
             {
                 MessageBox.Show("Не можливо обрахувати даним методом", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            // Оновлюємо відображення форми
             Refresh();
             MessageBox.Show($"Алгоритм Крускала завершився за {iterations} ітерацій.");
         }
 
         private void ResetEdgeStatus()
         {
-            // Позначаємо всі ребра, які не входять до мінімального остовного дерева, як false
             foreach (var edge in edges)
             {
                 if (!minimumSpanningTreeEdgeIDs.Contains(edge.Id))
@@ -384,16 +349,12 @@ namespace KP_OP_21
 
         private Edge CalculateEdgeFromIndex(int edgeIndex)
         {
-            // Отримуємо ребро, пов'язане з кнопкою
             Edge edge = edges[edgeIndex];
 
-            // Отримуємо вершину, яка починає ребро
             Vertex startVertex = edge.StartVertex;
 
-            // Отримуємо вершину, яка кінчає ребро
             Vertex endVertex = edge.EndVertex;
 
-            // Повертаємо ребро, пов'язане з вказаним індексом
             return edge;
         }
 
@@ -404,13 +365,12 @@ namespace KP_OP_21
             int size = vertices.Count;
             adjacencyMatrix = new double[size, size];
 
-            // Заповнюємо матрицю суміжності вагами ребер
             foreach (var edge in edges)
             {
                 int startIndex = vertices.IndexOf(edge.StartVertex);
                 int endIndex = vertices.IndexOf(edge.EndVertex);
                 adjacencyMatrix[startIndex, endIndex] = edge.Weight;
-                adjacencyMatrix[endIndex, startIndex] = edge.Weight; // Симетричність матриці
+                adjacencyMatrix[endIndex, startIndex] = edge.Weight;
             }
         }
 
@@ -419,22 +379,18 @@ namespace KP_OP_21
         {
             base.OnPaint(e);
 
-            // Малюємо ребра, які утворюють мінімальне остовне дерево
             foreach (int edgeIndex in minimumSpanningTreeEdgeIDs)
             {
                 Edge edge = CalculateEdgeFromIndex(edgeIndex);
                 e.Graphics.DrawLine(Pens.Blue, edge.StartVertex.point, edge.EndVertex.point);
             }
 
-            // Малюємо інші ребра
             foreach (var edge in edges)
             {
                 if (!edge.IsInMinimumSpanningTree)
                 {
                     e.Graphics.DrawLine(Pens.Black, edge.StartVertex.point, edge.EndVertex.point);
                 }
-
-                //e.Graphics.DrawLine(new Pen(edge.Color), edge.StartVertex.point, edge.EndVertex.point);
             }
         }
 
@@ -449,10 +405,8 @@ namespace KP_OP_21
             {
                 vertices.Add(new Vertex(e.Location.X, e.Location.Y)); // Додаємо новий об'єкт вершини з координатами
 
-                // Розширюємо матрицю суміжності при додаванні вершини
                 ResizeAdjacencyMatrix();
 
-                // Додавання кнопки для вершини
                 Button newButton = new Button();
                 newButton.Location = new Point(e.Location.X - 20, e.Location.Y - 20);
                 newButton.Size = new Size(40, 40);
@@ -476,7 +430,6 @@ namespace KP_OP_21
             {
                 if (currentMode == Mode.AddEdges)
                 {
-                    // Логіка для додавання вершини
                     if (isFirst)
                     {
                         isFirst = false;
@@ -493,10 +446,8 @@ namespace KP_OP_21
                         int firstIndex = buttons.IndexOf(firstBut);
                         int secondIndex = buttons.IndexOf(secondBut);
 
-                        // Перевірка на рівність ідентифікаторів вершин
                         if (firstIndex != -1 && secondIndex != -1 && firstIndex != secondIndex)
                         {
-                            // Перевірка на наявність ребра між вершинами
                             bool edgeExists = false;
                             Edge existingEdge = null;
                             foreach (var edge in edges)
@@ -511,11 +462,9 @@ namespace KP_OP_21
 
                             if (edgeExists)
                             {
-                                // Заміна ваги існуючого ребра
                                 int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
                                 existingEdge.Weight = weight;
                                 this.Invalidate();
-                                // Запит нової ваги ребра
                                 ShowEdgeWeightDialog(existingEdge);
                             }
                             else
@@ -525,23 +474,19 @@ namespace KP_OP_21
                                 vertices[firstIndex].IsConnectedToGraph = true;
                                 vertices[secondIndex].IsConnectedToGraph = true;
 
-                                // Вага ребра
                                 int weight = (int)adjacencyMatrix[firstIndex, secondIndex];
 
-                                // Додаємо з'єднання між вершинами у матрицю суміжності
                                 adjacencyMatrix[firstIndex, secondIndex] = weight;
-                                adjacencyMatrix[secondIndex, firstIndex] = weight; // Зберігаємо симетричність
+                                adjacencyMatrix[secondIndex, firstIndex] = weight;
 
                                 Edge newEdge = new Edge(start, end);
-                                newEdge.Weight = weight; // Встановлюємо вагу ребра
+                                newEdge.Weight = weight;
                                 edges.Add(newEdge);
 
-                                // Додаємо ребро до вершин
                                 start.AddEdge(newEdge);
                                 end.AddEdge(newEdge);
 
                                 this.Invalidate();
-                                // Показуємо діалог для встановлення ваги ребра
                                 ShowEdgeWeightDialog(newEdge);
                             }
                             InitializeAdjacencyMatrix();
@@ -550,7 +495,7 @@ namespace KP_OP_21
                         }
                         else
                         {
-                            isFirst = !isFirst; // Повертаємо isFirst до попереднього стану
+                            isFirst = !isFirst;
                             MessageBox.Show("Оберіть дві різні вершини", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -571,7 +516,6 @@ namespace KP_OP_21
 
             if (adjacencyMatrix != null)
             {
-                // Копіюємо існуючі дані у нову матрицю
                 for (int i = 0; i < Math.Min(size - 1, adjacencyMatrix.GetLength(0)); i++)
                 {
                     for (int j = 0; j < Math.Min(size - 1, adjacencyMatrix.GetLength(1)); j++)
@@ -605,11 +549,9 @@ namespace KP_OP_21
 
                 e.Graphics.DrawLine(edgePen, startPoint, endPoint);
 
-                // Відображення ваги ребра
                 PointF weightPosition = new PointF((startPoint.X + endPoint.X) / 2, (startPoint.Y + endPoint.Y) / 2);
 
-                // Встановлення більшого розміру шрифту
-                Font font = new Font(this.Font.FontFamily, 12, FontStyle.Bold); // Змініть розмір шрифту тут
+                Font font = new Font(this.Font.FontFamily, 12, FontStyle.Bold);
 
                 e.Graphics.DrawString(edge.Weight.ToString(), font, Brushes.Black, weightPosition);
             }
@@ -682,7 +624,6 @@ namespace KP_OP_21
             minimumSpanningTreeEdgeIDs.Clear();
 
             Edge.edgeCount = 0;
-            // Встановлення лічильника vertexCount на значення -1
             Vertex.ResetVertexCount();
 
             foreach (Button button in buttons)
@@ -700,7 +641,6 @@ namespace KP_OP_21
 
         private void SetButtonsColor()
         {
-            //currentMode = Mode.defaultMode;
             foreach (Button v in interfaceButtons)
             {
                 v.BackColor = Color.White;
@@ -711,9 +651,8 @@ namespace KP_OP_21
         {
             if (!isFirst)
             {
-                // Перевірка, чи перша вершина вже обрана
                 MessageBox.Show("Спершу оберіть другу вершину", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return; // Повертаємося, не робимо нічого більше
+                return;
             }
             SetButtonsColor();
 
@@ -736,18 +675,16 @@ namespace KP_OP_21
 
             if (vertices.Count < 2)
             {
-                // Перевірка, чи існує достатня кількість вершин для додавання ребер
                 MessageBox.Show("Додайте ще вершини для створення ребер", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return; // Повертаємося, не робимо нічого більше
+                return;
             }
 
             if (currentMode == Mode.AddEdges)
             {
                 if (!isFirst)
                 {
-                    // Перевірка, чи перша вершина вже обрана
                     MessageBox.Show("Спершу оберіть другу вершину", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Повертаємося, не робимо нічого більше
+                    return;
                 }
 
 
@@ -764,83 +701,6 @@ namespace KP_OP_21
                 clickedButton.BackColor = Color.Gray;
             }
         }
-
-
-        private void TempGenerateRandomGraph(int size)
-        {
-            ClearGraph(null, null);
-            // Очищення списків вершин, ребер та кнопок вершин
-            vertices.Clear();
-            edges.Clear();
-            minimumSpanningTreeEdgeIDs.Clear();
-
-            // Видалення кнопок вершин з форми і зі списку контролів
-            foreach (Button btn in buttons)
-            {
-                Controls.Remove(btn);
-            }
-            buttons.Clear(); // Очищення списку кнопок вершин
-
-            // Створення випадкових координат для вершин та додавання їх до списку вершин
-            Random random = new Random();
-            for (int i = 0; i < size; i++)
-            {
-                double x = random.Next(20, this.ClientSize.Width - 20);
-                double y = random.Next(20, this.ClientSize.Height - 20);
-                Vertex newVertex = new Vertex(x, y);
-                vertices.Add(newVertex);
-            }
-
-
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = i + 1; j < size; j++)
-                {
-                    //double weight = random.NextDouble() * 10; // Випадкова вага від 0 до 10
-                    int weight = random.Next(1, 11); // Випадкова вага від 0 до 10
-                    Vertex start = vertices[i];
-                    Vertex end = vertices[j];
-
-                    // Створення ребра та додавання його до списку ребер та вершин
-                    Edge newEdge = new Edge(start, end);
-                    newEdge.Weight = weight; // Встановлюємо вагу ребра
-                    edges.Add(newEdge);
-                    start.AddEdge(newEdge);
-                    end.AddEdge(newEdge);
-
-                    // Збільшення ступеня кожної вершини
-                    start.Degree++;
-                    end.Degree++;
-
-                    // Додавання вершин до списку з'єднаних вершин
-                    if (!start.IsConnectedToGraph)
-                    {
-                        start.IsConnectedToGraph = true;
-                    }
-                    if (!end.IsConnectedToGraph)
-                    {
-                        end.IsConnectedToGraph = true;
-                    }
-                }
-            }
-            // Створення кнопок для вершин та їх додавання на форму
-            foreach (Vertex vertex in vertices)
-            {
-                Button newButton = new Button();
-                newButton.Location = new Point((int)vertex.X - 20, (int)vertex.Y - 20);
-                newButton.Size = new Size(40, 40);
-                newButton.BackColor = Color.Black;
-                newButton.ForeColor = Color.White;
-                newButton.Text = vertices.IndexOf(vertex).ToString();
-                newButton.Click += new EventHandler(VerticleButtons);
-                buttons.Add(newButton);
-                Controls.Add(newButton);
-            }
-
-            // Відображення на формі
-            Refresh();
-        }
-
 
 
         private void Form1_Load(object sender, EventArgs e)
@@ -866,8 +726,8 @@ namespace KP_OP_21
         {
             StartVertex = start;
             EndVertex = end;
-            IsInMinimumSpanningTree = false; // Початкове значення прапорця
-            Id = edgeCount++; // Присвоюємо ребру унікальний ідентифікатор
+            IsInMinimumSpanningTree = false;
+            Id = edgeCount++;
         }
 
         public int GetOtherVertexIndex(int startVertexIndex)
@@ -875,11 +735,11 @@ namespace KP_OP_21
             return StartVertex.Id == startVertexIndex ? EndVertex.Id : StartVertex.Id;
         }
 
-        public readonly int Id; // Ідентифікатор ребра
+        public readonly int Id;
         public Vertex StartVertex { get; set; }
         public Vertex EndVertex { get; set; }
-        public double Weight { get; set; } // Вага ребра
-        public bool IsInMinimumSpanningTree { get; set; } // Прапорець, що вказує, чи належить ребро до мінімального остовного дерева
+        public double Weight { get; set; }
+        public bool IsInMinimumSpanningTree { get; set; }
     }
 
 
@@ -890,15 +750,15 @@ namespace KP_OP_21
     public class Vertex
     {
         private static int vertexCount = -1; // Кількість створених вершин
-        public int Id { get; set; } // Ідентифікатор вершини
-        public double X { get; set; } // Координата X
-        public double Y { get; set; } // Координата Y
-        public int Degree { get; set; } // Ступінь вершини
+        public int Id { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public int Degree { get; set; }
         [JsonIgnore]
         public List<Edge> Edges { get; set; } // Список ребер, що з'єднують цю вершину
         public Point point { get; set; }
-        public bool vertexIsInMinimumSpanningTree { get; set; } // Прапорець, що вказує, чи належить вершина до мінімального остовного дерева
-        public bool IsConnectedToGraph { get; set; } // Прапорець, що вказує, чи приєднана вершина до графа
+        public bool vertexIsInMinimumSpanningTree { get; set; }
+        public bool IsConnectedToGraph { get; set; }
 
 
         public Vertex(double x, double y)
@@ -909,8 +769,8 @@ namespace KP_OP_21
             Degree = 0;
             Edges = new List<Edge>();
             point = new Point((int)x, (int)y);
-            vertexIsInMinimumSpanningTree = false; // Початкове значення прапорця
-            IsConnectedToGraph = false; // Початкове значення прапорця
+            vertexIsInMinimumSpanningTree = false;
+            IsConnectedToGraph = false;
 
         }
         public void UpdateIndices(int removedIndex)
@@ -920,14 +780,12 @@ namespace KP_OP_21
                 Edge edge = Edges[i];
                 if (edge.StartVertex.Id == removedIndex || edge.EndVertex.Id == removedIndex)
                 {
-                    // Видалення з'єднання з цією вершиною
                     Edges.RemoveAt(i);
                     Degree--;
-                    i--; // Зменшуємо лічильник, оскільки ми видалили одне з'єднання
+                    i--;
                 }
                 else
                 {
-                    // Оновлюємо індекси ребра
                     edge.StartVertex.Id = edge.StartVertex.Id > removedIndex ? edge.StartVertex.Id - 1 : edge.StartVertex.Id;
                     edge.EndVertex.Id = edge.EndVertex.Id > removedIndex ? edge.EndVertex.Id - 1 : edge.EndVertex.Id;
                    }
@@ -940,7 +798,6 @@ namespace KP_OP_21
         }
 
 
-        // Додати ребро до вершини
         public void AddEdge(Edge edge)
         {
             Edges.Add(edge);
@@ -948,7 +805,6 @@ namespace KP_OP_21
         }
 
 
-            // Перевірити, чи вершина має з'єднання з іншою вершиною
         public bool IsConnectedTo(Vertex otherVertex)
         {
             foreach (var edge in Edges)
