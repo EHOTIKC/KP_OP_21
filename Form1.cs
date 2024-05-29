@@ -55,10 +55,20 @@ namespace KP_OP_21
 
 
 
+        //private void SaveGraphButton_Click(object sender, EventArgs e)
+        //{
+        //    SaveFileDialog saveFileDialog = new SaveFileDialog();
+        //    saveFileDialog.Filter = "JSON files (*.json)|*.json";
+        //    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        //    {
+        //        SaveGraphToFile(saveFileDialog.FileName);
+        //    }
+        //}
+
         private void SaveGraphButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "JSON files (*.json)|*.json";
+            saveFileDialog.Filter = "Text files (*.txt)|*.txt";
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 SaveGraphToFile(saveFileDialog.FileName);
@@ -75,8 +85,8 @@ namespace KP_OP_21
                     AdjacencyMatrix = adjacencyMatrix
                 };
 
-                string json = JsonConvert.SerializeObject(graphData);
-                File.WriteAllText(filePath, json);
+                string content = JsonConvert.SerializeObject(graphData);
+                File.WriteAllText(filePath, content);
 
                 MessageBox.Show("Граф успішно збережено у файл!");
             }
@@ -596,7 +606,7 @@ namespace KP_OP_21
                             }
                             else
                             {
-                                MessageBox.Show("Invalid weight value! Please enter a positive integer not greater than 10000000.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("Недійсне значення ваги! Будь ласка, введіть додатне ціле число не більше 10000000.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 e.Cancel = true;
                             }
                         }
