@@ -53,18 +53,6 @@ namespace KP_OP_21
         Button firstBut;
         Button secondBut;
 
-
-
-        //private void SaveGraphButton_Click(object sender, EventArgs e)
-        //{
-        //    SaveFileDialog saveFileDialog = new SaveFileDialog();
-        //    saveFileDialog.Filter = "JSON files (*.json)|*.json";
-        //    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-        //    {
-        //        SaveGraphToFile(saveFileDialog.FileName);
-        //    }
-        //}
-
         private void SaveGraphButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
