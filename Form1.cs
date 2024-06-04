@@ -200,6 +200,14 @@ namespace KP_OP_21
 
 
 
+        private void ResetAllEdgeStatus()
+        {
+            foreach (var edge in edges)
+            {
+                edge.IsInMinimumSpanningTree = false;
+            }
+        }
+
 
         private void PrimAlgorithm()
         {
@@ -494,6 +502,8 @@ namespace KP_OP_21
         {
             if (currentMode == Mode.AddVertex)
             {
+                ResetAllEdgeStatus();
+
                 labelMSTWeight.Text = "";
                 //StandardizeEdges(edges, vertices, adjacencyMatrix);
                 vertices.Add(new Vertex(e.Location.X, e.Location.Y)); // Додаємо новий об'єкт вершини з координатами
@@ -582,6 +592,7 @@ namespace KP_OP_21
                                 this.Invalidate();
                                 ShowEdgeWeightDialog(newEdge);
                                 labelMSTWeight.Text = "";
+                                ResetAllEdgeStatus();
                             }
                             InitializeAdjacencyMatrix();
                             firstBut = null;
