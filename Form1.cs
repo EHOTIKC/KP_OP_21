@@ -167,11 +167,43 @@ namespace KP_OP_21
         }
 
 
+        private bool IsGraphConnected()
+        {
+            HashSet<int> visitedVertices = new HashSet<int>();
+            Queue<int> queue = new Queue<int>();
+
+            queue.Enqueue(0);
+            visitedVertices.Add(0);
+
+            while (queue.Count > 0)
+            {
+                int currentVertex = queue.Dequeue();
+
+                foreach (var edge in vertices[currentVertex].Edges)
+                {
+                    int neighborVertex = edge.GetOtherVertexIndex(currentVertex);
+
+                    if (!visitedVertices.Contains(neighborVertex))
+                    {
+                        visitedVertices.Add(neighborVertex);
+                        queue.Enqueue(neighborVertex);
+                    }
+                }
+            }
+
+            return visitedVertices.Count == vertices.Count;
+        }
 
 
         private void PrimAlgorithm()
         {
             InitializeAdjacencyMatrix();
+
+            if (!IsGraphConnected())
+            {
+                MessageBox.Show("Граф не є зв'язним, неможливо обрахувати мінімальне остовне дерево", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             // Індекси вибраних вершин
             HashSet<int> selectedVertices = new HashSet<int>();
@@ -249,6 +281,13 @@ namespace KP_OP_21
         {
             InitializeAdjacencyMatrix();
 
+
+            if (!IsGraphConnected())
+            {
+                MessageBox.Show("Граф не є зв'язним, неможливо обрахувати мінімальне остовне дерево", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             int vertexCount = vertices.Count;
 
             minimumSpanningTreeEdgeIDs.Clear();
@@ -323,6 +362,13 @@ namespace KP_OP_21
         {
             InitializeAdjacencyMatrix();
             ResetEdgeStatus();
+
+
+            if (!IsGraphConnected())
+            {
+                MessageBox.Show("Граф не є зв'язним, неможливо обрахувати мінімальне остовне дерево", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             int vertexCount = vertices.Count;
             DisjointSet disjointSet = new DisjointSet(vertexCount);
