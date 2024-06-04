@@ -46,6 +46,7 @@ namespace KP_OP_21
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
+            this.labelMSTWeight = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -117,12 +118,22 @@ namespace KP_OP_21
             this.button7.Text = "зберегти в файл";
             this.button7.UseVisualStyleBackColor = false;
             // 
+            // labelMSTWeight
+            // 
+            this.labelMSTWeight.AutoSize = true;
+            this.labelMSTWeight.BackColor = System.Drawing.SystemColors.Control;
+            this.labelMSTWeight.Location = new System.Drawing.Point(284, 103);
+            this.labelMSTWeight.Name = "labelMSTWeight";
+            this.labelMSTWeight.Size = new System.Drawing.Size(0, 16);
+            this.labelMSTWeight.TabIndex = 8;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonShadow;
             this.ClientSize = new System.Drawing.Size(1924, 1055);
+            this.Controls.Add(this.labelMSTWeight);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
@@ -135,6 +146,7 @@ namespace KP_OP_21
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -147,6 +159,7 @@ namespace KP_OP_21
         private Button button5;
         private Button button6;
         private Button button7;
+        private Label labelMSTWeight;
     }
 }
 

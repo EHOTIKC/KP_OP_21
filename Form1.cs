@@ -25,6 +25,8 @@ namespace KP_OP_21
             button5.Click += new EventHandler(this.AddVetexMode);
             button6.Click += new EventHandler(this.AddEdgeMode);
             button7.Click += new EventHandler(this.SaveGraphButton_Click);
+
+            labelMSTWeight.Font = new Font(labelMSTWeight.Font.FontFamily, 14);
         }
 
         enum SearchMethod
@@ -46,6 +48,7 @@ namespace KP_OP_21
         double[,] adjacencyMatrix; // Матриця суміжності
         List<int> minimumSpanningTreeEdgeIDs = new List<int>(); // Індекси ребер утвореного остовного дерева
         List<Button> interfaceButtons = new List<Button>(); // Список кнопок інтерфейсу
+        double totalWeightOfMST = 0;
 
 
 
@@ -195,6 +198,9 @@ namespace KP_OP_21
         }
 
 
+
+
+
         private void PrimAlgorithm()
         {
             InitializeAdjacencyMatrix();
@@ -213,6 +219,7 @@ namespace KP_OP_21
             int vertexCount = vertices.Count;
 
             minimumSpanningTreeEdgeIDs.Clear();
+            totalWeightOfMST = 0;
             int iterations = 0;
             int edgeCount = 0; // Лічильник для перевірки на нескінченний цикл
 
@@ -251,6 +258,7 @@ namespace KP_OP_21
 
                     // Додаємо нову вершину до множини вибраних вершин
                     selectedVertices.Add(minVertexIndex);
+                    totalWeightOfMST += minEdge.Weight;
                     edgeCount++;
                 }
                 else
@@ -273,8 +281,13 @@ namespace KP_OP_21
             }
             ResetEdgeStatus();
             Refresh();
+            labelMSTWeight.Text = $"Загальна вага мінімального остовного дерева: {totalWeightOfMST}";
             MessageBox.Show($"Алгоритм Прима завершився за {iterations} ітерацій.");
         }
+
+
+
+
 
 
         private void BoruvkaAlgorithm()
@@ -291,6 +304,8 @@ namespace KP_OP_21
             int vertexCount = vertices.Count;
 
             minimumSpanningTreeEdgeIDs.Clear();
+
+            totalWeightOfMST = 0;
 
             int iterations = 0;
             while (minimumSpanningTreeEdgeIDs.Count < vertexCount - 1)
@@ -328,6 +343,7 @@ namespace KP_OP_21
                     {
                         minimumSpanningTreeEdgeIDs.Add(edgeIndex);
                         edges[edgeIndex].IsInMinimumSpanningTree = true;
+                        totalWeightOfMST += edges[edgeIndex].Weight; // Оновлення ваги MST
                         addedEdge = true;
                     }
                 }
@@ -342,6 +358,7 @@ namespace KP_OP_21
             ResetEdgeStatus();
 
             Refresh();
+            labelMSTWeight.Text = $"Загальна вага мінімального остовного дерева: {totalWeightOfMST}";
             MessageBox.Show($"Алгоритм Бору́вка завершився за {iterations} ітерацій.");
         }
 
@@ -375,6 +392,7 @@ namespace KP_OP_21
 
             int iterations = 0;
             int edgeCount = 0;
+            totalWeightOfMST = 0;
 
             foreach (var edge in edges.OrderBy(e => e.Weight))
             {
@@ -385,6 +403,7 @@ namespace KP_OP_21
                 {
                     edge.IsInMinimumSpanningTree = true;
                     disjointSet.Union(vertices.IndexOf(edge.StartVertex), vertices.IndexOf(edge.EndVertex));
+                    totalWeightOfMST += edge.Weight;
                     edgeCount++;
                 }
 
@@ -400,6 +419,7 @@ namespace KP_OP_21
             }
 
             Refresh();
+            labelMSTWeight.Text = $"Загальна вага мінімального остовного дерева: {totalWeightOfMST}";
             MessageBox.Show($"Алгоритм Крускала завершився за {iterations} ітерацій.");
         }
 
@@ -459,6 +479,10 @@ namespace KP_OP_21
                     e.Graphics.DrawLine(Pens.Black, edge.StartVertex.point, edge.EndVertex.point);
                 }
             }
+            for (int i = 0; i < edges.Count; i++)
+            {
+                edges[i].Id = i;
+            }
         }
 
 
@@ -470,6 +494,8 @@ namespace KP_OP_21
         {
             if (currentMode == Mode.AddVertex)
             {
+                labelMSTWeight.Text = "";
+                //StandardizeEdges(edges, vertices, adjacencyMatrix);
                 vertices.Add(new Vertex(e.Location.X, e.Location.Y)); // Додаємо новий об'єкт вершини з координатами
 
                 ResizeAdjacencyMatrix();
@@ -555,6 +581,7 @@ namespace KP_OP_21
 
                                 this.Invalidate();
                                 ShowEdgeWeightDialog(newEdge);
+                                labelMSTWeight.Text = "";
                             }
                             InitializeAdjacencyMatrix();
                             firstBut = null;
@@ -701,6 +728,7 @@ namespace KP_OP_21
 
             buttons.Clear();
             adjacencyMatrix = null;
+            labelMSTWeight.Text = "";
             Refresh();
         }
 
@@ -802,7 +830,7 @@ namespace KP_OP_21
             return StartVertex.Id == startVertexIndex ? EndVertex.Id : StartVertex.Id;
         }
 
-        public readonly int Id;
+        public int Id;
         public Vertex StartVertex { get; set; }
         public Vertex EndVertex { get; set; }
         public double Weight { get; set; }
