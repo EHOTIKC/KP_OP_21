@@ -53,6 +53,7 @@ namespace KP_OP_21
         Button firstBut;
         Button secondBut;
 
+
         private void SaveGraphButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -62,19 +63,37 @@ namespace KP_OP_21
                 SaveGraphToFile(saveFileDialog.FileName);
             }
         }
+
         private void SaveGraphToFile(string filePath)
         {
             try
             {
-                GraphData graphData = new GraphData
+                using (StreamWriter writer = new StreamWriter(filePath))
                 {
-                    Vertices = vertices,
-                    Edges = edges,
-                    AdjacencyMatrix = adjacencyMatrix
-                };
+                    // Збереження вершин
+                    writer.WriteLine(vertices.Count);
+                    foreach (var vertex in vertices)
+                    {
+                        writer.WriteLine($"{vertex.Id} {vertex.X} {vertex.Y} {vertex.Degree}");
+                    }
 
-                string content = JsonConvert.SerializeObject(graphData);
-                File.WriteAllText(filePath, content);
+                    // Збереження ребер
+                    writer.WriteLine(edges.Count);
+                    foreach (var edge in edges)
+                    {
+                        writer.WriteLine($"{edge.StartVertex.Id} {edge.EndVertex.Id} {edge.Weight}");
+                    }
+
+                    // Збереження матриці суміжності
+                    for (int i = 0; i < adjacencyMatrix.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < adjacencyMatrix.GetLength(1); j++)
+                        {
+                            writer.Write($"{adjacencyMatrix[i, j]} ");
+                        }
+                        writer.WriteLine();
+                    }
+                }
 
                 MessageBox.Show("Граф успішно збережено у файл!");
             }
@@ -83,6 +102,10 @@ namespace KP_OP_21
                 MessageBox.Show("Помилка збереження у файл: " + ex.Message);
             }
         }
+
+
+
+
 
 
         private void StartSearchClick(object sender, EventArgs e)
