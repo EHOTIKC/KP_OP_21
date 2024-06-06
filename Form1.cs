@@ -57,6 +57,9 @@ namespace KP_OP_21
         Button secondBut;
 
 
+
+
+
         private void SaveGraphButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -67,27 +70,39 @@ namespace KP_OP_21
             }
         }
 
+
         private void SaveGraphToFile(string filePath)
         {
             try
             {
                 using (StreamWriter writer = new StreamWriter(filePath))
                 {
+                    // Збереження загальної інформації про граф
+                    writer.WriteLine("Загальна інформація про граф:");
+                    writer.WriteLine($"Кількість вершин: {vertices.Count}");
+                    writer.WriteLine($"Кількість ребер: {edges.Count}");
+                    writer.WriteLine();
+
                     // Збереження вершин
-                    writer.WriteLine(vertices.Count);
+                    writer.WriteLine("Вершини:");
+                    writer.WriteLine("ID X Y Degree IsConnectedToGraph");
                     foreach (var vertex in vertices)
                     {
-                        writer.WriteLine($"{vertex.Id} {vertex.X} {vertex.Y} {vertex.Degree}");
+                        writer.WriteLine($"{vertex.Id} {vertex.X} {vertex.Y} {vertex.Degree} {vertex.IsConnectedToGraph}");
                     }
+                    writer.WriteLine();
 
                     // Збереження ребер
-                    writer.WriteLine(edges.Count);
+                    writer.WriteLine("Ребра:");
+                    writer.WriteLine("StartVertexId EndVertexId Weight IsInMinimumSpanningTree");
                     foreach (var edge in edges)
                     {
-                        writer.WriteLine($"{edge.StartVertex.Id} {edge.EndVertex.Id} {edge.Weight}");
+                        writer.WriteLine($"{edge.StartVertex.Id} {edge.EndVertex.Id} {edge.Weight} {edge.IsInMinimumSpanningTree}");
                     }
+                    writer.WriteLine();
 
                     // Збереження матриці суміжності
+                    writer.WriteLine("Матриця суміжності:");
                     for (int i = 0; i < adjacencyMatrix.GetLength(0); i++)
                     {
                         for (int j = 0; j < adjacencyMatrix.GetLength(1); j++)
@@ -105,7 +120,6 @@ namespace KP_OP_21
                 MessageBox.Show("Помилка збереження у файл: " + ex.Message);
             }
         }
-
 
 
 
